@@ -1,7 +1,7 @@
 git:
   quiet: true
 
-dist: trusty
+dist: bionic
 language: c
 sudo: required
 addons:
@@ -56,8 +56,6 @@ before_script:
     - export USE_CCACHE=1
     # Enable IPv6
     - sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6'
-    # Compile PHP
-    - ./travis/compile.sh
     # Setup Extensions
     - . ./travis/ext/mysql/setup.sh
     - . ./travis/ext/mysqli/setup.sh
