@@ -968,8 +968,12 @@ PHP_MINFO_FUNCTION(mysqli)
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 #if !defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQL_SERVER_VERSION /* for MariaDB bug https://jira.mariadb.org/browse/CONC-498 */
 	php_info_print_table_row(2, "Client API header version", MYSQL_SERVER_VERSION);
+#endif
+#ifdef MYSQL_UNIX_ADDR
 	php_info_print_table_row(2, "MYSQLI_SOCKET", MYSQL_UNIX_ADDR);
+#endif
 #endif
 	php_info_print_table_end();
 
