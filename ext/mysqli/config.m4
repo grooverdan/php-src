@@ -29,8 +29,11 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
 
 PHP_ARG_WITH(mysqli, for MySQLi support,
 [  --with-mysqli[=FILE]      Include MySQLi support.  FILE is the path
-                          to mysql_config.  If no value or mysqlnd is passed
-                          as FILE, the MySQL native driver will be used])
+                          to mysql_config.  If a directory is specified
+                          it assumed that a lib/pkgconfig/mysqlclient.pc
+                          pkg-config file will be used.  If no value or
+                          mysqlnd is passed as FILE, the MySQL native
+                          driver will be used])
 
 PHP_ARG_ENABLE(embedded_mysqli, whether to enable embedded MySQLi support,
 [  --enable-embedded-mysqli

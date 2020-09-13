@@ -45,6 +45,8 @@ else
         PDOMYSQL=${MYSQL_DIR}
         [ -f ${MYSQL_DIR}/bin/mariadb_config ] && MYSQLI=${MYSQL_DIR}/bin/mariadb_config
         [ -f ${MYSQL_DIR}/bin/mysql_config ] && MYSQLI=${MYSQL_DIR}/bin/mysql_config
+        [ -f ${MYSQL_DIR}/lib/pkgconfig/libmariadb.pc ] && MYSQLI=${MYSQL_DIR}
+        [ -f ${MYSQL_DIR}/lib/pkgconfig/mysqlclient.pc ] && MYSQLI=${MYSQL_DIR}
 fi
 MAKE_JOBS=${MAKE_JOBS:-2}
 
