@@ -60,8 +60,22 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   else
     AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
 
+    AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
     AC_MSG_CHECKING([for mysql_config])
-    if test -n "$PDO_MYSQL_CONFIG"; then
+    if test -d "$PHP_PDO_MYSQL" -a -x "$PKG_CONFIG"; then
+      if test -r PHP_PDO_MYSQL/lib/pkgconfig/mysqlclient.pc ; then
+        PK=mysqlclient
+        AC_MSG_RESULT(using pkg-config $PK)
+      elif test -r PHP_PDO_MYSQL/lib/pkgconfig/libmariadb.pc ; then
+        PK=libmariadb
+        AC_MSG_RESULT(using pkg-config $PK)
+      fi
+      if test -n "$PK"; then
+        PDO_MYSQL_INCLUDE=`PKG_CONFIG_PATH=PHP_PDO_MYSQL $PKG_CONFIG --define-prefix --cflags $PK`
+        PDO_MYSQL_LIBS=`PKG_CONFIG_PATH=$PHP_PDO_MYSQL $PKG_CONFIG --define-prefix --libs $PK`
+      fi
+    fi
+    if test -x "$PDO_MYSQL_CONFIG" -a -z "$PK"; then
       AC_MSG_RESULT($PDO_MYSQL_CONFIG)
       if test "x$SED" = "x"; then
         AC_PATH_PROG(SED, sed)
