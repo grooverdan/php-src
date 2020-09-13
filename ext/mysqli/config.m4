@@ -61,7 +61,28 @@ elif test "$PHP_MYSQLI" != "no"; then
     MYSQL_LIB_CFG='--libs'
   fi
 
-  if test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG $MYSQL_LIB_CFG > /dev/null 2>&1; then
+  if test -d "$MYSQL_CONFIG" > /dev/null 2>&1; then
+    dnl assume its a pkg-config base path
+    AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+    if test -x "$PKG_CONFIG"; then
+       AC_MSG_CHECKING(for mysqlclient.pc)
+       if test -r $MYSQL_CONFIG/lib/pkgconfig/mysqlclient.pc ; then
+         PK=mysqlclient
+         AC_MSG_RESULT(using $PK)
+       elif test -r $MYSQL_CONFIG/lib/pkgconfig/libmariadb.pc ; then
+         PK=libmariadb
+         AC_MSG_RESULT(using $PK)
+       fi
+       if test -n "$PK"; then
+         MYSQLI_INCLINE=`PKG_CONFIG_PATH=$MYSQL_CONFIG $PKG_CONFIG --define-prefix --cflags $PK`
+         MYSQLI_LIBLINE=`PKG_CONFIG_PATH=$MYSQL_CONFIG $PKG_CONFIG --define-prefix --libs $PK`
+       else
+         AC_MSG_RESULT(not found)
+       fi
+    else
+      AC_MSG_WARN([$MYSQL_CONFIG set to a directory, however no pkg-config found])
+    fi
+  elif test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG $MYSQL_LIB_CFG > /dev/null 2>&1; then
     MYSQLI_INCLINE=`$MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
     MYSQLI_LIBLINE=`$MYSQL_CONFIG $MYSQL_LIB_CFG | $SED -e "s/'//g"`
   else
