@@ -23,6 +23,21 @@ if [[ -z "$MAKE_LOG_FILE" ]]; then
 else
 	MAKE_QUIET=""
 fi
+if [[ -n "$LIBMYSQL" ]]; then
+	case "$LIBMYSQL" in
+	*.gz) EXTRACT=zxf ;;
+	*.xz) EXTRACT=Jxf ;;
+	esac
+	MYSQL_BASE=${LIBMYSQL%%-linux-*}
+	MYSQL_VERSION=${MYSQL_BASE#*-}
+	MYSQL_DIR=$HOME/$MYSQL_BASE
+        mkdir -p $MYSQL_DIR
+	case "$LIBMYSQL" in
+	mysql*) URL=https://cdn.mysql.com//Downloads/MySQL-${MYSQL_VERSION%.*}/$LIBMYSQL ;;
+	mariadb*) URL=https://ftp.osuosl.org/pub/mariadb/$MYSQL_BASE/bintar-linux-x86_64/$LIBMYSQL ;;
+	esac
+	wget $URL -O - | tar -${EXTRACT} - --strip-components=1  -C $MYSQL_DIR
+fi
 if [[ -z "$MYSQL_DIR" ]]; then
         PDOMYSQL=mysqlnd
         MYSQLI=mysqlnd
