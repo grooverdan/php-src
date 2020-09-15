@@ -23,19 +23,40 @@ if [[ -z "$MAKE_LOG_FILE" ]]; then
 else
 	MAKE_QUIET=""
 fi
-
+if [[ -n "$LIBMYSQL" ]]; then
+	case "$LIBMYSQL" in
+	*.gz) EXTRACT=zxf ;;
+	*.xz) EXTRACT=Jxf ;;
+	esac
+	MYSQL_BASE=${LIBMYSQL%%-linux-*}
+	MYSQL_VERSION=${MYSQL_BASE#*-}
+	MYSQL_DIR=$HOME/$MYSQL_BASE
+        mkdir -p $MYSQL_DIR
+	URL=https://cdn.mysql.com//Downloads/MySQL-${MYSQL_VERSION%.*}/$LIBMYSQL
+	wget $URL -O - | tar -${EXTRACT} - --strip-components=1  -C $MYSQL_DIR
+fi
+if [[ -z "$MYSQL_DIR" ]]; then
+        PDOMYSQL=mysqlnd
+        MYSQLI=mysqlnd
+else
+        PDOMYSQL=${MYSQL_DIR}
+        [ -f ${MYSQL_DIR}/bin/mysql_config ] && MYSQLI=${MYSQL_DIR}/bin/mysql_config
+fi
 MAKE_JOBS=${MAKE_JOBS:-2}
 
-./buildconf --force
-./configure \
+if [ ! -f ${TRAVIS_BUILD_DIR}/configure ]; then
+        (cd ${TRAVIS_BUILD_DIR} ; ./buildconf --force )
+fi
+
+${TRAVIS_BUILD_DIR}/configure \
 --prefix="$HOME"/php-install \
 $CONFIG_QUIET \
 $DEBUG \
 $TS \
 --enable-phpdbg \
 --enable-fpm \
---with-pdo-mysql=mysqlnd \
---with-mysqli=mysqlnd \
+--with-pdo-mysql=${PDOMYSQL} \
+--with-mysqli=${MYSQLI} \
 --with-pgsql \
 --with-pdo-pgsql \
 --with-pdo-sqlite \
@@ -78,7 +99,7 @@ $TS \
 --with-kerberos \
 --enable-sysvmsg \
 --enable-zend-test=shared \
-> "$CONFIG_LOG_FILE"
+> "$CONFIG_LOG_FILE" || (cat config.log; exit 2)
 
 make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"
 make install >> "$MAKE_LOG_FILE"
